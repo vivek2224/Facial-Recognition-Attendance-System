@@ -1,0 +1,284 @@
+{% extends "course_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+
+  <style type="text/css">
+
+    h3{
+        font-size: 20px;
+        text-align: center;
+    }
+    hr {
+        width: 95%;
+        border-top: 2px solid black
+    }
+    tbody tr:nth-child(even){
+         background: #1e90ff3b;
+    }
+    .attendance_container{
+        border: 2px solid rgba(188, 188, 188, .5);
+        background: white;
+        min-height: 100%;
+        min-width: 650px;
+    }
+    span{
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    .back_button{
+        color : #9d9d9d;
+        font-size: 18px;
+        float: right;
+        margin-top: 10px;
+        margin-right:10px;
+    }
+    .back_button:hover{
+        color: white;
+    }
+     .camera_button{
+        color : white;
+        font-size: 18px;
+        float: left;
+        margin-top: 8px;
+        margin-left:10px;
+        padding: 5px 10px 5px;
+        background-color: #1e90ff;
+        border-radius: 10px;
+    }
+
+
+    /* Background Modal */
+    .statusmodal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        min-width: 700px;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+/* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    .close {
+        color: #1e90ff;
+        opacity: 0.6;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: #06519a;
+        opacity: 0.6;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .status_modal_hr {
+        width: 100%;
+    }
+
+    #status_submit {
+        background: #1e90ff;
+        margin: auto;
+        width: 90%;
+        color: white;
+        font-weight: bold;
+    }
+    #status_submit:hover:enabled {
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+    #status_submit:disabled {
+        background-color: #67acf096;
+    }
+
+    .toast_display {
+        opacity: 1;
+        box-shadow: 5px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        z-index: 4;
+        line-height: 50px;
+        position: sticky;
+        display: none;
+        color: #d9d6d6;
+        height: 50px;
+        width: 300px;
+        bottom: 50px;
+        background: #222;
+        font-size: 18px;
+        text-align: center;
+        margin: 0px auto;
+        transition: opacity 1s
+    }
+
+
+  </style>
+{% endblock %}
+{% block content %}
+
+    <div id="statusModal" class="statusmodal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal()">&times;</span>
+            <div>
+                <h3>Change status for <span id = "selector_name"></span></h3>
+                <hr class="status_modal_hr">
+                <form action="/manually_change_status" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Change Status To: </label>
+                        <select id="status_options" name = "status" onchange="enableSubmit()" class="form-control">
+                            <option value="present">Present</option>
+                            <option value="tardy">Tardy</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                        <input type="hidden" name="course" value={{course}}>
+                        <input type="hidden" name="date" value="{{day}}">
+                        <input type="hidden" name="email" id = "select_name_input">
+                    </div>
+                    <button type="submit" class="form-control" id = "status_submit">Change</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<!-------------------------------------------------------------------------------------->
+    <div class = "attendance_container">
+        <div style="background-color: #333; height: 50px;" >
+            {% if cam_status %}
+            <a href = "/p_end_video_feed"
+               class = "camera_button" style = "background-color: red">
+                <i class="fa fa-camera"></i> &nbsp; Stop Camera
+            </a>
+            {% else %}
+            <a href = "/p_start_video_feed?course={{course}}&date={{day}}"
+               class = "camera_button">
+                <i class="fa fa-camera"></i> &nbsp; Start Camera
+            </a>
+            {% endif %}
+            <a href = "/{{course}}/attendance"
+               class = "back_button">
+                <i class="fa fa-arrow-left"></i> Back
+            </a>
+                    {% if cam_status %}
+             {% endif %}
+        </div>
+        {% if cam_status %}
+        <div style = "background: linear-gradient(to right, #999, #555, #555); height: 500px; padding-top: 10px;">
+            <img src="{{ url_for('p_video_feed') }}"; width="640px" height="480px"
+                 style="border: 3px solid red; display: block; margin: 0px auto;">
+        </div>
+        {% endif %}
+        <h3><b>Attendance</b><span> {{day}}</span></h3>
+        <hr>
+        <table class="table">
+    <thead style = "border-radius: 30px">
+      <tr style = "background: #1e90ff; color: white">
+        <th>Course</th>
+        <th>Name [Last, First]</th>
+        <th>Email</th>
+        <th>Status</th>
+
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+    <tr>
+        <td>{{course.replace("_"," ")}}</td>
+        <td>{{ row['last_name'] + ', ' + row['first_name'] }} </td>
+        <td>{{ row['email'] }} </td>
+        <td>
+            <a href = 'javascript:void(0)' onclick="status_modal('{{row['email']}}', '{{row['student_status']}}');"
+                {% set status = row['student_status'].capitalize() %}
+                {% if status =='Present' %}
+                    style = "color: green"
+                {% elif status == 'Tardy'%}
+                    style = "color: orange; font-weight: bold"
+                {% else %}
+                    style = "color: red; font-weight: bold"
+                {% endif %}
+            >
+                {{ status }}
+            </a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    </div>
+    <div id = "toast_display" class = "toast_display">
+            {{ message }}
+    </div>
+{% endblock %}
+{% block script %}
+      <script>
+          markAttendance();
+          function markAttendance(){
+            let dashboard = document.getElementById("attendances_bar");
+            // dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+          }
+
+
+
+      </script>
+      <script>
+          status_modal_element = document.getElementById("statusModal");
+
+          function status_modal(email, current_status){
+            const map = {"present": 0, "tardy": 1, "absent": 2};
+            document.getElementById("selector_name").innerHTML = email;
+            document.getElementById("status_options").value = current_status;
+            document.getElementById("status_options").options[map[current_status]].disabled = true;
+            document.getElementById("status_submit").disabled = true;
+            document.getElementById("select_name_input").value = email;
+            status_modal_element.style.display = "block";
+          }
+          function enableSubmit(){
+            document.getElementById("status_submit").disabled = false;
+          }
+
+          function close_modal() {
+              let status_option_elements = document.getElementById("status_options");
+              status_option_elements.options[0].disabled = false;
+              status_option_elements.options[1].disabled = false;
+              status_option_elements.options[2].disabled = false;
+              status_modal_element.style.display = "none";
+          }
+
+
+
+        {% if submit %}
+          toast_element = document.getElementById("toast_display");
+          toast_element.style.display = "block";
+          fade_toast()
+          function fade_toast(){
+            setTimeout(function(){
+            toast_element.style.opacity = "0";
+            }, 1000);
+            setTimeout(function(){
+            toast_element.style.display = "none";
+            }, 2000);
+          }
+         {% endif %}
+
+
+      </script>
+
+{% endblock %}

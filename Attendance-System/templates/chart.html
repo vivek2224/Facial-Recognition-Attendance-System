@@ -1,0 +1,31 @@
+{% extends "course_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+
+      <style>
+.bar_container{
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+}
+      </style>
+
+  {% endblock %}
+  {% block content %}
+    <!-- .container -->
+    <div align = "center" class = "bar_fcontainer" style = "padding: 0px; height: 90vh">
+        <embed type="image/svg+xml" src={{bar_chart_cate_data|safe}} style='max-width:45%; max-height:600px;'/>
+    </div>
+ {% endblock %}
+{% block script %}
+  <script>
+       markBar();
+        function markBar(){
+            let dashboard = document.getElementById("statistics_bar");
+            dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+        }
+  </script>
+{% endblock %}

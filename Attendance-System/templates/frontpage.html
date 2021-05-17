@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>FRAS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet" type="text/css"  media="screen"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  </head>
+
+  <!--We should generate a CSS file for styling-->
+  <style>
+    .container {
+      padding: 0px;
+      background-image: url('/static/root_fras1.jpg');
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      background-size: cover;
+      transition: background-image 1s;
+
+    }
+    .login-box {
+      background: white;
+      height: 100vh;
+      width: 40%;
+      overflow: auto;
+      float: right;
+    }
+    @media screen and (max-width: 900px) {
+      .login-box {
+        width: 70%;
+      }
+    }
+    @media screen and (max-width: 600px) {
+      .login-box {
+        width: 100%;
+        min-width: 300px;
+      }
+    }
+
+    .icon {
+      background: #1e90ff;
+      color: white;
+      padding: 5px;
+      margin: 0p auto;
+      margin-left: 43%;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      font-size: 50px;
+      text-align: center;
+    }
+    .btn {
+      margin-top: 2px;
+      background: #1e90ff;
+      border-color: #1e90ff;
+      font-weight: bold;
+      width: 100%;
+    }
+  </style>
+
+
+  <body>
+  <nav class="navbar navbar-inverse" style = " overflow: visible; white-space: nowrap; margin : 0px; border-color: #000; position: absolute; left: 0; right: 0; z-index: 1; border-radius: 0;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" style = "font-size: 25px" href="/"><b>FRAS</b></a>
+            </div>
+            <!--<ul class="nav navbar-nav navbar-right">
+                <li><a href="/register" style = "font-size: 17px">About</a></li>
+                <li><a href="/login" style = "font-size: 17px">Login</a></li>
+            </ul>-->
+        </div>
+    </nav>
+    <div class = "container" id="container">
+        <div class = "login-box">
+          <div style = "padding-left: 10%; padding-right: 10%; padding-top: 125px">
+            <div style = "margin: 0 auto">
+               <i class="fa fa-user icon"></i>
+              <h3 style="text-align : center"> <b>Sign In</b></h3>
+            </div>
+            <form action="/" method="POST" style = "padding-top: 5px">
+            <div class="form-group">
+              <label>Email:</label>
+              <input type="text" class="form-control"
+                     {%if error %} style = "border: 1.5px solid red;" value = "{{cred['email']}}" {% endif %} name="email"/>
+            </div>
+            <div class="form-group">
+              <label>Password:</label>
+              <input type="password" class="form-control"
+                     {%if error %} style = "border: 1.5px solid red;" value = "{{cred['pass']}}" {% endif %} name="password" />
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary" >Login</button>
+            </div>
+              {%if error %} <p id = "message" style = "font-size: 15px; color: red"> Incorrect Email or Password </p> {% endif %}
+            <!--<p style = "font-size: 16px"> <b>New to FRAS? <a href = "/register">Click Here To Register</a> </b></p>-->
+          </form>
+        </div>
+        </div>
+    </div>
+    <script>
+        var images = ["static/root_fras1.jpeg", "static/root_fras2.jpeg", "static/root_fras3.jpg"];
+        var i = 2;
+        var image = document.getElementById("container");
+        image.style.backgroundImage = "url(" + images[i] + ")";
+        setInterval(function() {
+            i = i + 1;
+            if (i == images.length) {
+                i =  0;
+            }
+            image.style.backgroundImage = "url(" + images[i] + ")";
+        }, 2000);
+    </script>
+  </body>
+
+</html>

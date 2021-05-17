@@ -1,0 +1,429 @@
+{% extends "course_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+
+  <style type="text/css">
+
+    h3{
+        font-size: 20px;
+        text-align: center;
+    }
+    hr {
+        width: 95%;
+        border-top: 2px solid black
+    }
+    .roster_container{
+        border: 2px solid rgba(188, 188, 188, .5);
+        background: white;
+        min-height: 100%;
+        min-width: 600px;
+    }
+    span{
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+    tbody tr:nth-child(even){
+         background: #1e90ff3b;
+    }
+
+    input:focus, button:focus, textarea:focus, select:focus{
+        outline: none;
+    }
+
+   .search input[type=text]{
+        width:250px;
+        height:30px;
+        padding-left: 12px;
+        border-radius: 10px 0 0 10px;
+        text-decoration: none;
+        border: 1px solid #1e90ff;
+    }
+
+    .search{
+        float:right;
+        margin:7px;
+        margin-bottom: 15px;
+    }
+
+    .search button{
+        background-color: #1e90ff;
+        color: #f2f2f2;
+        float: right;
+        padding: 5px 10px;
+        border-radius: 0 10px 10px 0;
+        margin-right: 16px;
+        font-size: 12px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .add_button {
+        background-color: #1e90ff;
+        border: none;
+        height:30px;
+        width: 150px;
+        color: white;
+        border-radius: 20px;
+    }
+
+    .search button:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+
+    a:hover{
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+ /* Background Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        min-width: 700px;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+/* Modal Content */
+    .modal_header{
+        font-size: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    .close {
+        color: #1e90ff;
+        opacity: 0.6;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: #06519a;
+        opacity: 0.6;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .image_modal_hr {
+        width: 100%;
+    }
+
+
+     #submit_add_btn {
+        background: #1e90ff;
+        margin: auto;
+        width: 90%;
+        color: white;
+        font-weight: bold;
+    }
+    .error{
+        color: red;
+    }
+
+    .toast_display {
+        opacity: 1;
+        box-shadow: 5px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        z-index: 4;
+        line-height: 50px;
+        position: sticky;
+        display: none;
+        color: #d9d6d6;
+        height: 50px;
+        width: 300px;
+        bottom: 50px;
+        background: #222;
+        font-size: 18px;
+        text-align: center;
+        margin: 0px auto;
+        transition: opacity 1s
+    }
+
+    #delete_btn_submit{
+        margin-left: 5%;
+        width: 45%;
+        background: #1e90ff;
+        color: white;
+        font-weight: bold;
+    }
+    #delete_btn_cancel{
+        width: 45%;
+        background: #1e90ff;
+        color: white;
+        font-weight: bold;
+    }
+
+    #submit_add_btn:hover, #delete_btn_submit:hover, #delete_btn_cancel:hover {
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+
+
+
+  </style>
+{% endblock %}
+{% block content %}
+
+    <div id="imgModal" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal()">&times;</span>
+            <div>
+                <h3 id="image_message">Upload an image for <span id = "image_selector_name"></span></h3>
+                <hr class="image_modal_hr">
+                <form action="/{{course}}/upload-image" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Select image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image" id="image">
+                            <input type="hidden" name="email" id = "image_name_input">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% if cred['admin'] %}
+<!-- Student Add -->
+<div id="modalAdd" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal_add()">&times;</span>
+            <div>
+                <h3 class="modal_header">Add Student to Course</h3>
+                <hr class="modal_hr">
+                <form action="/{{course}}/roster/add_student_submit" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Email</label>
+                        {% if modal_add_error %}
+                        <input name="email" type="text" class="form-control" value = {{modal_request_data['email']}}>
+                        {% if 'email' in  error_message %}
+                        <p class="error"> * {{error_message['email']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="email" type="text" class="form-control">
+                        {% endif %}
+                        <a href = "javascript:void()" onclick="redirect_students()">Click to see all students</a>
+                    </div>
+                    <div>
+                        <button type="submit" class="form-control" id="submit_add_btn">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Student Drop -->
+    <div id="imgModalDelete" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content" style = "width: 25%; min-width: 300px">
+            <span class="close" onclick="close_modal_delete()">&times;</span>
+            <div>
+                <h3>Are you sure you want to drop this student: <span id = "image_selector_name_delete"></span>?</h3>
+                <form action="/{{course}}/roster/drop_student" method="POST" enctype="multipart/form-data">
+                    <input name="email" type="hidden" class="form-control" id="email_delete_input">
+                    <button type="submit" class="btn btn-primary" id="delete_btn_submit">Yes</button>
+                    <href class="btn btn-primary" onclick="close_modal_delete()" id="delete_btn_cancel">Cancel</href>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+<!-- ................. -->
+
+    <div class = "roster_container">
+        <h3><b>Roster</b></h3>
+        <hr>
+    {% if cred['admin'] %}
+    <div style = "float: left; margin-left: 10px; width: 150px; height: 30px;">
+        <button class="add_button" onclick="open_add_form()"><i class = "fa fa-plus"></i> Add Student </button>
+    </div>
+    {% endif %}
+    <div class="search">
+            <form action="/{{course}}/roster" method="POST">
+                <input type="text" autocomplete="off"
+                    placeholder=" Search Names"
+                    name="search">
+                <button>
+                    <i class="fa fa-search"
+                        style="font-size: 18px;">
+                    </i>
+                </button>
+            </form>
+    </div>
+    <div style = "display: block">
+    <!--    {% if search %}
+        <p>Searchh: {{request}} </p>
+        {% endif %}-->
+    </div>
+   <table class="table">
+    <thead style = "border-radius: 30px">
+      <tr style = "background: #1e90ff; color: white">
+        <th>Course</th>
+        <th>Name [Last, First]</th>
+        <th>Email</th>
+        <th>Image</th>
+        {% if cred['admin'] %}
+        <th>Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+    <tr>
+        <td>{{course.replace("_"," ")}}</td>
+        <td>{{ row['last_name'] + ', ' + row['first_name'] }} </td>
+        <td>{{ row['email'] }} </td>
+        <td>
+            <a name = "{{row['email']}}" onclick="image_modal(this.name);">
+                {% if not row['image'] %}N/A{% else %}See Image{% endif %}
+            </a>
+            {% if row['image'] %}
+            <br>
+            <a onclick="change_image('{{row['email']}}')">
+                Change Image
+            </a>
+            {% endif %}
+        </td>
+         {% if cred['admin'] %}
+        <td>
+            <a name = "{{row['email']}}"  onclick="test_func_delete(this.name)">
+                <i style = "font-size: 20px" class="fa fa-minus-circle"></i>
+            </a>
+        </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+   {% if not data|length %}
+        <p style = "text-align: center; font-size: 15px;"> <b>{{message}}</b> </p>
+    {% endif %}
+    </div>
+    <div id = "toast_display" class = "toast_display">
+            {{ submit_message }}
+    </div>
+{% endblock %}
+{% block script %}
+      <script>
+
+          markRoster();
+          function markRoster(){
+            let dashboard = document.getElementById("roster_bar");
+            dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+          }
+
+
+      </script>
+      <script>
+          img_modal = document.getElementById("imgModal");
+
+          function change_image(email){
+            let email_element = document.getElementsByName(email)[0];
+            let course_name = document.getElementById("course_name").innerHTML.replace(" ", "_");
+            img_modal.style.display = "block";
+            document.getElementById("image_selector_name").innerHTML = email;
+            document.getElementById("image_name_input").value = email;
+            let image_message = document.getElementById("image_message");
+            image_message.innerHTML = image_message.innerHTML.replace("Upload an","Change");
+          }
+
+          function image_modal(email){
+            let email_element = document.getElementsByName(email)[0];
+            let course_name = document.getElementById("course_name").innerHTML.replace(" ", "_");
+            //alert("Image click acknowledged: " + email + "| Image: " + email_element.innerHTML.includes('N/A'));
+            if(email_element.innerHTML.includes('N/A')){
+                img_modal.style.display = "block";
+                document.getElementById("image_selector_name").innerHTML = email;
+                document.getElementById("image_name_input").value = email;
+                let image_message = document.getElementById("image_message");
+                image_message.innerHTML = image_message.innerHTML.replace("Change","Upload an");
+            }
+            else {
+               window.open("/display_image/" + email + "/" + course_name ,"_blank");
+            }
+          }
+          function close_modal() {
+              img_modal.style.display = "none";
+          }
+
+
+
+
+      </script>
+    {% if submit %}
+      <script>
+          toast_element = document.getElementById("toast_display");
+          toast_element.style.display = "block";
+          fade_toast()
+          function fade_toast(){
+            setTimeout(function(){
+            toast_element.style.opacity = "0";
+            }, 1000);
+            setTimeout(function(){
+            toast_element.style.display = "none";
+            }, 2000);
+          }
+      </script>
+    {% endif %}
+{% if cred['admin'] %}
+    <script>
+        img_modal_add = document.getElementById("modalAdd");
+        {% if modal_add_error %}
+          img_modal_add.style.display = "block";
+        {% endif %}
+        function open_add_form(){
+            img_modal_add.style.display = "block";
+        }
+        function close_modal_add(){
+            img_modal_add.style.display = "none";
+        }
+        function redirect_students(){
+            window.open("/students" ,"_blank");
+        }
+    </script>
+      <script>
+          img_modal_delete = document.getElementById("imgModalDelete");
+           function test_func_delete(email){
+            let email_element = document.getElementsByName(email)[1];
+            img_modal_delete.style.display = "block"; //display modal
+            document.getElementById("image_selector_name_delete").innerHTML = email;
+            document.getElementById("email_delete_input").value = email;
+
+            //alert("Image click acknowledged: " + email + "| DELETE");
+          }
+
+           function close_modal_delete() {
+              img_modal_delete.style.display = "none";
+          }
+      </script>
+{% endif %}
+{% endblock %}

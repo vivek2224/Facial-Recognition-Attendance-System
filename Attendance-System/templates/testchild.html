@@ -1,0 +1,18 @@
+{% extends "testparent.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #FFF778; }
+  </style>
+{% endblock %}
+{% block content %}
+  <h1>Index</h1>
+  <p class="important">
+    Welcome on my awesome homepage.
+{% endblock %}
+{% block script %}
+      <script>
+      document.getElementById('test_tag').innerHTML = "hello world";
+      </script>
+{% endblock %}

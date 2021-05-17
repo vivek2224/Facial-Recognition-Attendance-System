@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <link rel="stylesheet" type="text/css"  media="screen"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>FRAS</title>
+    <meta name="google" content="notranslate" />
+    {% endblock %}
+  </head>
+  <style>
+    html {
+        scroll-behavior: smooth;
+    }
+    body{
+      background: linear-gradient(to left, #A0C4EE, white, white, #A0C4EE);
+    }
+    .sidebar {
+    {% if cam_status %}
+      margin-top: 80px;
+    {% else %}
+      margin-top: 50px;
+    {% endif %}
+      height: 100%;
+      min-height: 400px;
+      width: 200px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #222;
+      overflow-x: hidden;
+      overflow-y: auto;
+      transition: 0.5s;
+    }
+    .sidebar a {
+      padding: 8px 8px 8px 16px;
+      white-space: nowrap;
+      text-decoration: none;
+      font-size: 20px;
+      color: #818181;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .sidebar a:first-of-type {
+        background: white;
+        color: #1e90ff;
+    }
+
+     .sidebar a:hover:not(:first-of-type) {
+      color: #f1f1f1;
+    }
+    .closebtn {
+      position: absolute;
+      right: 15px;
+      font-size: 36px;
+      margin-left: 50px;
+      bottom: 10px;
+    }
+    .openbtn {
+      font-size: 20px;
+      cursor: pointer;
+      background-color: #111;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+    }
+
+    .openbtn:hover {
+      background-color: #444;
+    }
+
+    #main {
+      transition: margin-left .5s;
+      margin-left: 200px;
+      height: 100vh;
+      padding: 16px;
+    }
+
+    #nav_control {
+      position: absolute;
+      font-size: 25px;
+      right: 20px;
+      {% if cam_status %}
+      bottom: 80px;
+      {% else %}
+      bottom: 50px;
+      {% endif %}
+    }
+
+    #main_child{
+     {% if cam_status %}
+        margin-top: 85px;
+     {% else %}
+        margin-top: 55px;
+     {% endif %}
+        height: 90%;
+    }
+    .record_display {
+      height: 35px;
+      width: 100%;
+      z-index: 2;
+      margin-top: 50px;
+      background: linear-gradient(to bottom, #ff4d4d, #ff3333, red);
+      position: fixed;
+      font-size: 20px;
+      color: white;
+    }
+
+    @media (max-width: 766px) {
+    {% if cam_status %}
+      .record_display {
+        margin-top: 100px;
+      }
+      .sidebar {
+        margin-top: 135px;
+      }
+      #main_child{
+        margin-top: 140px;
+      }
+      #nav_control {
+        bottom: 130px;
+      }
+      {% else %}
+      .sidebar {
+        margin-top: 105px;
+      }
+      #main_child{
+        margin-top: 110px;
+      }
+      #nav_control {
+        bottom: 100px;
+      }
+      {% endif %}
+    }
+
+    @media screen and (max-height: 450px) {
+      .sidebar {padding-top: 15px;}
+      .sidebar a {font-size: 18px;}
+    }
+  </style>
+  <body>
+    {% if cam_status %}
+     <div class = "record_display">
+       <center><i class = "fa fa-dot-circle-o"></i><b>&ensp; R e c o r d i n g</b></center>
+     </div>
+    {% endif %}
+     <nav class="navbar navbar-inverse" style = "margin : 0px; position: fixed; left: 0; right: 0; z-index: 2; border-radius: 0; flex-wrap: nowrap">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" style = "font-size: 25px" href="/home"><b>FRAS</b></a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/logout" style = "font-size: 17px"><i class="fa fa-sign-out"></i>&nbsp;Sign Out</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div id="mySidebar" class="sidebar">
+      <a>
+        <i style = "font-size: 25px" class="fa fa-graduation-cap"></i>
+          &ensp;<b id = course_name>{{course.replace("_"," ")}}</b>
+      </a>
+      <a href="/{{course}}/attendance" id="attendances_bar">
+        <i style = "font-size: 25px" class="fa fa-check-square-o"></i>
+        &ensp;&ensp;Attendances
+      </a>
+      <a href="/{{course}}/roster" id="roster_bar">
+        <i style = "font-size: 25px" class="fa fa-users"></i>
+        &ensp;&ensp;Roster
+      </a>
+      <!--<a href="/{{course}}/chart" id="statistics_bar">
+        <i style = "font-size: 25px" class="fa fa-bar-chart"></i>
+        &ensp;&ensp;Statistics
+      </a>
+      {% if cam_status %}
+      <a href="/p_end_video_feed" id="statistics_bar">
+        <i style = "font-size: 25px" class="fa fa-camera"></i>
+        &ensp;&ensp;Stop Camera
+      </a>
+      {% else %}
+      <a href="/p_start_video_feed?course={{course}}&date={{day}}" id="statistics_bar">
+        <i style = "font-size: 25px" class="fa fa-camera"></i>
+        &ensp;&ensp;Start Camera
+      </a>
+      {% endif %}-->
+       <a href="#" id="setting_bar">
+        <i style = "font-size: 25px" class="fa fa-cogs"></i>
+        &ensp;&ensp;Settings
+      </a>
+      <a href="/home">
+        <i style = "font-size: 25px; vertical-align: middle;" class="fa fa-arrow-left"></i>
+          &ensp;&ensp;Return<br>
+          &emsp;&emsp; Dashboard
+      </a>
+      <a id= "nav_control" onclick="controlNav()">
+        <i class="fa fa-angle-double-left"></i>
+      </a>
+     </div>
+     <div id="main">
+       <div id = "main_child">
+         {% block content %}{% endblock %}
+       </div>
+       <p id ="test"></p>
+     </div>
+    <!--<div id="footer">
+      {% block footer %}
+      &copy; Copyright 2010 by <a href="http://domain.invalid/">you</a>.
+      {% endblock %}
+    </div>-->
+    <script>
+      function openNav() {
+        document.getElementById("mySidebar").style.width = "200px";
+        document.getElementById("main").style.marginLeft = "200px";
+      }
+
+      function closeNav() {
+        document.getElementById("mySidebar").style.width = "60px";
+        document.getElementById("main").style.marginLeft= "60px";
+      }
+
+      function controlNav(){
+        let nav_control = document.getElementById("nav_control").children[0];
+        if(nav_control.className == "fa fa-angle-double-left") {
+            closeNav();
+            nav_control.className = "fa fa-angle-double-right"
+        }
+        else{
+            openNav();
+            nav_control.className = "fa fa-angle-double-left"
+        }
+      }
+    </script>
+    {% block script %}
+    {% endblock %}
+  </body>
+</html>

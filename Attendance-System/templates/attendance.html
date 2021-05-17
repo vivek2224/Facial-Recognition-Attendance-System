@@ -1,0 +1,394 @@
+{% extends "course_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+
+  <style type="text/css">
+     h5 {
+        font-size: 18px;
+        color: white;
+        font-weight: bold;
+        text-align: left;
+    }
+    h5:hover {
+        color: black;
+    }
+    a:hover {
+        text-decoration: none;
+    }
+    h3{
+        font-size: 20px;
+        text-align: center;
+    }
+    h2{
+        margin: 20px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    hr {
+        width: 95%;
+        border-top: 2px solid black
+    }
+
+    span{
+        font-weight: bold;
+        color: #1e90ff;
+    }
+
+    .attendance_container{
+        border: 2px solid rgba(188, 188, 188, .5);
+        background: white;
+        min-height: 100%;
+        min-width: 750px;
+    }
+
+
+    .lecture_card {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        position: relative;
+        border-radius: 8px;
+        width: 90%;
+        margin: auto;
+        margin-top: 20px;
+        padding-left: 10px;
+
+        background: linear-gradient(to right, #1e90ff 0%, #1e90ff 30%, #ffffff 0%, #ffffff 100%);
+        box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .graph_display{
+        //border-left: 2px solid #1e90ff;
+        //border-right: 2px solid #1e90ff;
+        //border-bottom: 2px solid #1e90ff;
+        background: linear-gradient(to top right, #77b2eb9c 0%, #ccffff 93%);
+        border-radius: 0 0 8px 8px;
+        width: 70%;
+        margin: auto;
+        box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
+        display: none;
+    }
+
+    .gen_button {
+        font-size: 18px;
+        border: none;
+        background-color: transparent;
+        color: #337ab7;
+        float: right;
+        margin-right: 10px;
+    }
+    .gen_button:hover{
+        color: #23527C;
+    }
+
+    .toast_display {
+        opacity: 1;
+        box-shadow: 5px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        z-index: 4;
+        line-height: 50px;
+        position: sticky;
+        display: none;
+        color: #d9d6d6;
+        height: 50px;
+        width: 300px;
+        bottom: 50px;
+        background: #222;
+        font-size: 18px;
+        text-align: center;
+        margin: 0px auto;
+        transition: opacity 1s
+    }
+
+
+  </style>
+{% endblock %}
+{% block content %}
+    <div class = "attendance_container">
+        <h3><b>Attendance</b></h3>
+        <hr>
+
+        {% if upcoming_data %}
+        <h2>Upcoming</h2>
+
+        {% for row in upcoming_data|reverse %}
+        {% if not (row['status']['absent'] == row['status']['present'] == row['status']['tardy'] == 0)  %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <a href = "/{{course}}/attendance/list/{{row['lec_date_format']}}">
+                        <h5>{{row['lec_date']}}<br/>{{course_time}}</h5>
+                    </a>
+                </div>
+                <div style = "vertical-align:top; width: 45%; display:inline-block; ">
+                       <p style = "margin-top: 15px; display: inline-block; vertical-align: middle; font-size: 20px">
+                           <span>Present: </span> {{row['status']['present']}} &ensp;
+                           <span>Tardy: </span> {{row['status']['tardy']}} &ensp;
+                           <span>Absent: </span> {{row['status']['absent']}}
+                       </p>
+                </div>
+                <div style = "vertical-align:top; width: 15%; display:inline-block; float: right ">
+                    <a href = 'javascript:void(0)' onclick="display_graph('{{row['lec_date_format']}}')">
+                        <p name = {{row['lec_date_format']}} style = "margin-top: 15px; margin-right: 10px; text-align: right; font-size: 18px">
+                           See Graph
+                       </p>
+                    </a>
+                </div>
+            </div>
+            <div align = "center" name = {{row['lec_date_format']}} class = "graph_display">
+                    <embed type="image/svg+xml" src={{row['graph']|safe}} style='display: inline-block; right: 0px; max-width: 80%;'/>
+            </div>
+        {% else %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <h5 style="pointer-events: none;">{{row['lec_date']}}<br/>{{course_time}}</h5>
+                </div>
+                <div style = "vertical-align:top;  width: 60%; display:inline-block; float: right ">
+                     <form action="/attendance_list/generate" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="hidden" name="course" value= {{course}}>
+                            <input type="hidden" name="date" value = {{row['lec_date_format']}}>
+                        </div>
+                        <button type="submit" class = "gen_button">Click to Generate</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% endfor %}
+
+        {% endif %}
+
+        {% if current_data %}
+        <h2>Current</h2>
+
+        {% for row in current_data|reverse %}
+        {% if not (row['status']['absent'] == row['status']['present'] == row['status']['tardy'] == 0)  %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <a href = "/{{course}}/attendance/list/{{row['lec_date_format']}}">
+                        <h5>{{row['lec_date']}}<br/>{{course_time}}</h5>
+                    </a>
+                </div>
+                <div style = "vertical-align:top; width: 45%; display:inline-block; ">
+                       <p style = "margin-top: 15px; display: inline-block; vertical-align: middle; font-size: 20px">
+                           <span>Present: </span> {{row['status']['present']}} &ensp;
+                           <span>Tardy: </span> {{row['status']['tardy']}} &ensp;
+                           <span>Absent: </span> {{row['status']['absent']}}
+                       </p>
+                </div>
+                <div style = "vertical-align:top; width: 15%; display:inline-block; float: right ">
+                    <a href = 'javascript:void(0)' onclick="display_graph('{{row['lec_date_format']}}')">
+                        <p name = {{row['lec_date_format']}} style = "margin-top: 15px; margin-right: 10px; text-align: right; font-size: 18px">
+                           See Graph
+                       </p>
+                    </a>
+                </div>
+            </div>
+            <div align = "center" name = {{row['lec_date_format']}} class = "graph_display">
+                    <embed type="image/svg+xml" src={{row['graph']|safe}} style='display: inline-block; right: 0px; max-width: 80%;'/>
+            </div>
+        {% else %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <h5 style="pointer-events: none;">{{row['lec_date']}}<br/>{{course_time}}</h5>
+                </div>
+                <div style = "vertical-align:top;  width: 60%; display:inline-block; float: right ">
+                     <form action="/attendance_list/generate" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="hidden" name="course" value= {{course}}>
+                            <input type="hidden" name="date" value = {{row['lec_date_format']}}>
+                        </div>
+                        <button type="submit" class = "gen_button">Click to Generate</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% endfor %}
+
+        {% endif %}
+
+
+        {% if future_data %}
+        <h2>Future</h2>
+
+        {% for row in future_data|reverse %}
+        {% if not (row['status']['absent'] == row['status']['present'] == row['status']['tardy'] == 0)  %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <a href = "/{{course}}/attendance/list/{{row['lec_date_format']}}">
+                        <h5>{{row['lec_date']}}<br/>{{course_time}}</h5>
+                    </a>
+                </div>
+                <div style = "vertical-align:top; width: 45%; display:inline-block; ">
+                       <p style = "margin-top: 15px; display: inline-block; vertical-align: middle; font-size: 20px">
+                           <span>Present: </span> {{row['status']['present']}} &ensp;
+                           <span>Tardy: </span> {{row['status']['tardy']}} &ensp;
+                           <span>Absent: </span> {{row['status']['absent']}}
+                       </p>
+                </div>
+                <div style = "vertical-align:top; width: 15%; display:inline-block; float: right ">
+                    <a href = 'javascript:void(0)' onclick="display_graph('{{row['lec_date_format']}}')">
+                        <p name = {{row['lec_date_format']}} style = "margin-top: 15px; margin-right: 10px; text-align: right; font-size: 18px">
+                           See Graph
+                       </p>
+                    </a>
+                </div>
+            </div>
+            <div align = "center" name = {{row['lec_date_format']}} class = "graph_display">
+                    <embed type="image/svg+xml" src={{row['graph']|safe}} style='display: inline-block; right: 0px; max-width: 80%;'/>
+            </div>
+        {% else %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <h5 style="pointer-events: none;">{{row['lec_date']}}<br/>{{course_time}}</h5>
+                </div>
+                <div style = "vertical-align:top;  width: 60%; display:inline-block; float: right ">
+                   <form action="/attendance_list/generate" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="hidden" name="course" value= {{course}}>
+                            <input type="hidden" name="date" value = {{row['lec_date_format']}}>
+                        </div>
+                        <button type="submit" class = "gen_button">Click to Generate</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% endfor %}
+
+        {% endif %}
+
+
+        {% if past_data %}
+        <h2>Past</h2>
+
+        {% for row in past_data|reverse %}
+        {% if not (row['status']['absent'] == row['status']['present'] == row['status']['tardy'] == 0)  %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <a href = "/{{course}}/attendance/list/{{row['lec_date_format']}}">
+                        <h5>{{row['lec_date']}}<br/>{{course_time}}</h5>
+                    </a>
+                </div>
+                <div style = "vertical-align:top; width: 45%; display:inline-block; ">
+                       <p style = "margin-top: 15px; display: inline-block; vertical-align: middle; font-size: 20px">
+                           <span>Present: </span> {{row['status']['present']}} &ensp;
+                           <span>Tardy: </span> {{row['status']['tardy']}} &ensp;
+                           <span>Absent: </span> {{row['status']['absent']}}
+                       </p>
+                </div>
+                <div style = "vertical-align:top; width: 15%; display:inline-block; float: right ">
+                    <a href = 'javascript:void(0)' onclick="display_graph('{{row['lec_date_format']}}')">
+                        <p name = {{row['lec_date_format']}} style = "margin-top: 15px; margin-right: 10px; text-align: right; font-size: 18px">
+                           See Graph
+                       </p>
+                    </a>
+                </div>
+            </div>
+            <div align = "center" name = {{row['lec_date_format']}} class = "graph_display">
+                    <embed type="image/svg+xml" src={{row['graph']|safe}} style='display: inline-block; right: 0px; max-width: 80%;'/>
+            </div>
+        {% else %}
+        <div class = "lecture_card">
+                <div style = "vertical-align:top; width: 30%; display:inline-block;">
+                    <h5 style="pointer-events: none;">{{row['lec_date']}}<br/>{{course_time}}</h5>
+                </div>
+                <div style = "vertical-align:top;  width: 60%; display:inline-block; float: right ">
+                     <form action="/attendance_list/generate" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="hidden" name="course" value= {{course}}>
+                            <input type="hidden" name="date" value = {{row['lec_date_format']}}>
+                        </div>
+                        <button type="submit" class = "gen_button">Click to Generate</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% endfor %}
+
+        {% endif %}
+    </div>
+    <div id = "toast_display" class = "toast_display">
+            {{ submit_message }}
+    </div>
+{% endblock %}
+{% block script %}
+      <script>
+          markAttendance();
+          function markAttendance(){
+            let dashboard = document.getElementById("attendances_bar");
+            dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+          }
+
+
+      </script>
+      <script>
+          img_modal = document.getElementById("imgModal");
+
+          function display_graph(date) {
+            let elements = document.getElementsByName(date);
+            let click_element = elements[0];
+            let graph_element = elements[1];
+            if(click_element.innerHTML.includes("See")){
+                graph_element.style.display = "block";
+                click_element.innerHTML = "Hide Graph";
+            }
+            else {
+                graph_element.style.display = "none";
+                click_element.innerHTML = "See Graph";
+            }
+            click_element.childNodes[0].className = "fa fa-bar-chart";
+          }
+
+          function close_modal() {
+              img_modal.style.display = "none";
+          }
+      </script>
+      <script>
+          {% if submit %}
+          toast_element = document.getElementById("toast_display");
+          toast_element.style.display = "block";
+          fade_toast()
+          function fade_toast(){
+            setTimeout(function(){
+            toast_element.style.opacity = "0";
+            }, 1000);
+            setTimeout(function(){
+            toast_element.style.display = "none";
+            }, 2000);
+          }
+         {% endif %}
+      </script>
+      <script>
+         img_modal_edit = document.getElementById("imgModalEdit");
+
+         function test_func_edit(email){
+            let email_element = document.getElementsByName(email)[0];
+            img_modal_edit.style.display = "block"; //display modal
+            document.getElementById("image_selector_name_edit").innerHTML = email
+            //alert("Image click acknowledged: " + email + "| Edit");
+          }
+
+         function close_modal_edit() {
+              img_modal_edit.style.display = "none";
+          }
+
+          img_modal_delete = document.getElementById("imgModalDelete");
+           function test_func_delete(email){
+            let email_element = document.getElementsByName(email)[1];
+            img_modal_delete.style.display = "block"; //display modal
+            document.getElementById("image_selector_name_delete").innerHTML = email
+            //alert("Image click acknowledged: " + email + "| DELETE");
+          }
+
+           function close_modal_delete() {
+              img_modal_delete.style.display = "none";
+          }
+
+      </script>
+{% endblock %}

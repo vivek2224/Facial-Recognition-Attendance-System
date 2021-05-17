@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+      <link rel = "stylesheet" href="style.css">
+      <style>
+.container{
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+}
+.boxdisplay{
+    font-size: 20px;
+    margin: 5px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background: linear-gradient(white, #D9E5F2,#E3EBF3);
+    color: #364250;
+}
+
+
+<!-- body -->
+.header { grid-column-start: 1;
+    grid-column-end: 4;
+     grid-row-start: 1;}
+.menu { grid-column-start: 1;
+    grid-column-end: 1;
+    grid-row-start: 2;
+    grid-row-end:  4; }
+.body { grid-column-start: 2;
+    grid-column-end: 4;
+    grid-row-start: 2;
+    grid-row-end: 4; }
+.footer { grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 4;}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 30px 1fr 1fr 50px;
+  grid-gap: 10px;
+  background-color: #2196F3;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.grid-container  div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-size: 30px;
+  padding: 5px;
+  border: 1px solid #000000;
+}
+
+.body h3{
+    margin: 1rem;
+}
+
+.body table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.body thead{
+    background: #efefef;
+    text-align: left;
+}
+
+th,td{
+    font-size: 2.5rem;
+    padding: 1rem;
+    text-align: left;
+}
+
+tbody tr:nth-child(even){
+    background: #f9fafc;
+}
+
+
+      </style>
+  </head>
+  <body style =  "position: relative; min-height: 100vh; background: linear-gradient(#A0C4EE, white);" >
+    <nav class="navbar navbar-inverse" style = "margin-bottom:0px;">
+      <div class="container">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-expanded="false"
+            aria-controls="navbar"
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand"style = "font-size: 20px">FRAS</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse" style = "font-size: 17px">
+        <ul class="nav navbar-nav">
+            <li class ="active"><a><span><img src="https://cdn.clipart.email/c861d1f394b8e8bb1e8183ea39a11d23_white-house-silhouette-clip-art-at-clkercom-vector-clip-art-_540-598.png" width = 17px height = 17px>
+                </span>Home</a></li>
+                <li><a href="/chart"><img src="https://ya-webdesign.com/transparent450_/graph-transparent-white-2.png" width = 17px height = 17px>
+                </span>Chart</a></li>
+            <li><a href="/settings"><span><img src="https://www.iconsdb.com/icons/preview/white/cash-receiving-xxl.png" width = 17px height = 17px>
+                </span>Settings</a></li>
+            <li><a href="/reset">Email Me</a></li>
+            <li><a href="/upload-image">Upload Image</a></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div>
+        <!--/.nav-collapse -->
+      </div>
+    </nav>
+    <!-- .container -->
+    <div class = "container" style = "padding: 0px; height: 10vh">
+        <h1 style ="padding-top: 10px; text-align: center; font-size: 30px;"><span><img src = https://cdn1.iconfinder.com/data/icons/ios-11-glyphs/30/money_bag-512.png width = 30px height = 30px> </span><b>Hello {{session['name'] }}! Welcome to FRAS, your automated attendance system.</b></h1>
+
+    </div>
+
+
+    <!-- .body -->
+
+    <div class="grid-container">
+        <div class="header">
+
+        </div>
+        <div class="menu">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
+
+                <form action="/test_roster_after" method = "POST">
+                <label for="courses">Courses:</label>
+                    <select name="courses" id="courses">
+                        <option value="Choose">CHOOSE COURSE</option>
+                    <option value="title">title</option>
+                    <option value="title2">title2</option>
+                    <option value="title3">title3</option>
+                    <option value="cmpe 187">CMPE 187</option>
+                </select>
+                    <br><br>
+                   <!-- <div class="form-group">-->
+                <input class = "form-group" type="submit" value="Submit">
+                    <!--</div>-->
+
+                    <button><a href="/video_feed">Start Video Stream</a></button>
+                    <button><a href="/">History</a></button>
+                </form>
+        </div>
+        <div class="body" id = "connect">
+            <h3>Roster</h3>
+            <table>
+               <tr>
+                  <!-- <th>Student ID</th> -->
+                   <th>Course</th>
+                   <th>Name (Last, First)</th>
+                   <th>Email</th>
+                   <th>Image</th>
+               </tr>
+                {% for row in data %}
+                <tr>
+                    <!-- <td>{{ row['student_id'] }} </td> -->
+                    <td>{{ row['last_name'] + ', ' + row['first_name'] }} </td>
+                    <td>{{ row['email'] }} </td>
+                    <td>{{ row['image'] }} </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="footer">
+
+        </div>
+</div>
+
+
+    <footer style = "background-color : #101010; height: 40px; position : absolute; bottom: 0; width: 100%">
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>

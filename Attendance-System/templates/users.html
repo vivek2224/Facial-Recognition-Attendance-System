@@ -1,0 +1,397 @@
+{% extends "front_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+
+  <style type="text/css">
+
+    h3{
+        font-size: 20px;
+        text-align: center;
+    }
+    hr {
+        width: 95%;
+        border-top: 2px solid black
+    }
+    .users_container{
+        border: 2px solid rgba(188, 188, 188, .5);
+        background: white;
+        min-height: 100%;
+        min-width: 1000px;
+    }
+    span{
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    a:hover{
+        cursor: pointer;
+        text-decoration: none;
+    }
+    tbody tr:nth-child(even){
+         background: #1e90ff3b;
+    }
+
+    input:focus, button:focus, textarea:focus, select:focus{
+        outline: none;
+    }
+
+   .search input[type=text]{
+        width:250px;
+        height:30px;
+        padding-left: 12px;
+        border-radius: 10px 0 0 10px;
+        text-decoration: none;
+        border: 1px solid #1e90ff;
+    }
+
+    .search{
+        float:right;
+        margin:7px;
+        margin-bottom: 15px;
+    }
+
+    .search button{
+        background-color: #1e90ff;
+        color: #f2f2f2;
+        float: right;
+        padding: 5px 10px;
+        border-radius: 0 10px 10px 0;
+        margin-right: 16px;
+        font-size: 12px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .search button:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+
+    /* Modal Content */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        min-width: 700px;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+    .modal_header{
+        font-size: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    .close {
+        color: #1e90ff;
+        opacity: 0.6;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: #06519a;
+        opacity: 0.6;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal_hr {
+        width: 100%;
+        border-top: 2px solid black
+    }
+
+    #submit_btn {
+        background: #1e90ff;
+        margin: auto;
+        width: 90%;
+        color: white;
+        font-weight: bold;
+    }
+    #submit_btn:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+    #submit_edit_btn {
+        background: #1e90ff;
+        margin: auto;
+        width: 90%;
+        color: white;
+        font-weight: bold;
+    }
+
+    #submit_edit_btn:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+
+    .error{
+        color: red;
+    }
+
+    .add_button {
+        background-color: #1e90ff;
+        border: none;
+        height:30px;
+        width: 150px;
+        color: white;
+        border-radius: 20px;
+    }
+
+    .toast_display {
+        opacity: 1;
+        box-shadow: 5px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        z-index: 4;
+        line-height: 50px;
+        position: sticky;
+        display: none;
+        color: #d9d6d6;
+        height: 50px;
+        width: 300px;
+        bottom: 50px;
+        background: #222;
+        font-size: 18px;
+        text-align: center;
+        margin: 0px auto;
+        transition: opacity 1s
+    }
+
+
+  </style>
+{% endblock %}
+{% block content %}
+    <div id="modalAdd" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal()">&times;</span>
+            <div>
+                <h3 class="modal_header">Add Student</h3>
+                <hr class="modal_hr">
+                <form action="/users/add_user_submit" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {% if modal_error %}
+                        <input name="first_name" type="text" class="form-control" value = {{modal_request_data['first_name']}}>
+                        {% if 'first_name' in  error_message %}
+                        <p class="error"> * {{error_message['first_name']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="first_name" type="text" class="form-control">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {% if modal_error %}
+                        <input name="last_name" type="text" class="form-control" value = {{modal_request_data['last_name']}}>
+                        {% if 'last_name' in  error_message %}
+                        <p class="error"> * {{error_message['last_name']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="last_name" type="text" class="form-control">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        {% if modal_error %}
+                        <input name="email" type="text" class="form-control" value = {{modal_request_data['email']}}>
+                        {% if 'email' in  error_message %}
+                        <p class="error"> * {{error_message['email']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="email" type="text" class="form-control">
+                        {% endif %}
+                    </div>
+                    <div class="form-group" style = "display:none">
+                        <label>Pass</label>
+                        {% if modal_error %}
+                        <input name="pass" type="text" class="form-control" value = {{modal_request_data['pass']}}>
+                        {% if 'pass' in  error_message %}
+                        <p class="error"> * {{error_message['pass']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="pass" type="text" class="form-control">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>User Role</label>
+                        <select name = "user_role" class="form-control">
+                            <option value="none" selected="True" disabled="True"
+                                    hidden="True">Select Role</option>
+                            <option value="regular">Regular</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        {% if 'user_role' in  error_message %}
+                        <p class="error"> * {{error_message['user_role']}}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button type="submit" class="form-control" id="submit_btn">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEdit" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal_edit()">&times;</span>
+            <div>
+                <h3>
+                    Edit Student for <span id = "edit_selector_email"></span>
+                </h3>
+                <hr class="modal_hr">
+                <form action="/students/edit_student_submit" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {% if modal_edit_error %}
+                        <input name="first_name" type="text" class="form-control" id="fname_edit_input" value = {{modal_request_data['first_name']}}>
+                        {% if 'first_name' in  error_message %}
+                        <p class="error"> * {{error_message['first_name']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="first_name" type="text" class="form-control" id="fname_edit_input">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {% if modal_edit_error %}
+                        <input name="last_name" type="text" class="form-control" id="lname_edit_input" value = {{modal_request_data['last_name']}}>
+                        {% if 'last_name' in  error_message %}
+                        <p class="error"> * {{error_message['last_name']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="last_name" type="text" class="form-control" id="lname_edit_input">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {% if modal_edit_error %}
+                        <input name="email" type="hidden" class="form-control" id="email_edit_input" value = {{modal_request_data['email']}}>
+                        {% else %}
+                        <input name="email" type="hidden" class="form-control" id="email_edit_input">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button type="submit" class="form-control" id="submit_edit_btn">Edit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-------------------------------------------------------------------------------------->
+
+    <div class = "users_container">
+        <h3><b>Users</b></h3>
+        <hr>
+        <div style = "float: left; margin-left: 10px; width: 150px; height: 30px; margin-bottom: 10px">
+            <button class="add_button" onclick="open_students_form()"><i class = "fa fa-plus"></i> Add Users </button>
+        </div>
+   <table class="table">
+    <thead style = "border-radius: 30px">
+      <tr style = "background: #1e90ff; color: white">
+        <th>ID</th>
+        <th>Name [Last, First]</th>
+        <th>Email</th>
+        <th>Pass</th>
+        <th>User Role</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+    <tr>
+        <td>{{ row['id']}} </td>
+        <td>{{ row['last_name'] + ', ' + row['first_name'] }} </td>
+        <td>{{ row['email'] }} </td>
+        <td>{{ row['pass'] }} </td>
+        <td>{{ row['user_role'].capitalize() }} </td>
+        <td>{{ row['created_at'] }} </td>
+        <td>
+            {% if row['user_role'] != 'admin' %}
+            <a name = "{{row['email']}}"  onclick="test_func_edit(this.name)">
+                <i style = "font-size: 20px" class="fa fa-pencil"></i>
+            </a>
+            <a name = "{{row['email']}}"  onclick="test_func_delete(this.name)">
+                <i style = "font-size: 20px" class="fa fa-minus-circle"></i>
+            </a>
+            {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    {% if not data|length %}
+        <p style = "text-align: center; font-size: 15px;"> <b>{{message}}</b> </p>
+    {% endif %}
+    </div>
+    <div id = "toast_display" class = "toast_display">
+            {{ submit_message }}
+    </div>
+{% endblock %}
+{% block script %}
+      <script>
+          markUsers();
+          function markUsers(){
+            let dashboard = document.getElementById("users_bar");
+            dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+          }
+
+           function test_func_edit(email){
+            let email_element = document.getElementsByName(email)[0];
+            alert("Image click acknowledged: " + email + "| Edit");
+          }
+          function test_func_delete(email){
+            let email_element = document.getElementsByName(email)[1];
+            alert("Image click acknowledged: " + email + "| DELETE");
+          }
+      </script>
+    <script>
+         modal_element = document.getElementById("modalAdd");
+         function open_students_form(){
+            modal_element.style.display = "block";
+          }
+         function close_modal(){
+            modal_element.style.display = "none";
+          }
+          {% if modal_error %}
+          modal_element.style.display = "block";
+          {% endif %}
+      </script>
+    {% if submit %}
+      <script>
+          toast_element = document.getElementById("toast_display");
+          toast_element.style.display = "block";
+          fade_toast()
+          function fade_toast(){
+            setTimeout(function(){
+            toast_element.style.opacity = "0";
+            }, 1000);
+            setTimeout(function(){
+            toast_element.style.display = "none";
+            }, 2000);
+          }
+      </script>
+    {% endif %}
+{% endblock %}

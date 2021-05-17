@@ -1,0 +1,421 @@
+{% extends "front_nav.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    #w_header {
+        font-size: 20px;
+        text-align: center;
+    }
+    .home_container{
+        border: 2px solid rgba(188, 188, 188, .5);
+        background: white;
+        min-height: 100%;
+        min-width: 600px;
+    }
+    .course_card {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        vertical-align:top;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        display: inline-block;
+        min-height: 175px;
+        width: 30%;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-left: 1%;
+
+        background: linear-gradient(to bottom, #1e90ff 0%, #1e90ff 40px, #ffffff 0%, #ffffff 100%);
+        box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
+        transition: width 0.4s, height 4s;
+    }
+    @media (max-width: 1000px) {
+        .course_card {
+            width: 45%;
+        }
+    }
+    @media (max-width: 750px) {
+        .course_card {
+            display: block;
+            margin: 0 auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            width: 90%;
+        }
+    }
+    #home_hr {
+        width: 95%;
+        border-top: 2px solid black
+    }
+    span{
+        font-weight: bold;
+        color: #1e90ff;
+    }
+    h5 {
+        font-size: 20px;
+        color: white;
+        font-weight: bold;
+        text-align: center
+    }
+
+    h5:hover {
+        color: black;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+
+    input:focus, button:focus, textarea: focus, select:focus{
+        outline: none;
+    }
+
+    .search_container{
+        display: block;
+        height: 50px;
+        margin-right: 3%;
+    }
+    .search input[type=text]{
+        width:200px;
+        height:30px;
+        padding-left: 12px;
+        border-radius: 10px 0 0 10px;
+        text-decoration: none;
+        border: 1px solid #1e90ff;
+    }
+    .search{
+        float: right;
+        margin:7px;
+    }
+
+    .search button{
+        background-color: #1e90ff;
+        color: #f2f2f2;
+        float: right;
+        padding: 5px 10px;
+        border-radius: 0 10px 10px 0;
+        margin-right: 16px;
+        font-size: 12px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .search button:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+
+    .add_button {
+        background-color: #1e90ff;
+        border: none;
+        height:30px;
+        width: 150px;
+        color: white;
+        border-radius: 20px;
+    }
+
+    /* Background Modal */
+    #course_header{
+        font-size: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: #1e90ff;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        min-width: 700px;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+/* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    .close {
+        color: #1e90ff;
+        opacity: 0.6;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+        color: #06519a;
+        opacity: 0.6;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal_hr {
+        width: 100%;
+        border-top: 2px solid black
+    }
+
+    #submit_btn {
+        background: #1e90ff;
+        margin: auto;
+        width: 90%;
+        color: white;
+        font-weight: bold;
+    }
+    #submit_btn:hover{
+        color: #a4c1de;
+        background-color: #06519a;
+    }
+    .error{
+        color: red;
+    }
+
+
+    .toast_display {
+        opacity: 1;
+        box-shadow: 5px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        z-index: 4;
+        line-height: 50px;
+        position: sticky;
+        display: none;
+        color: #d9d6d6;
+        height: 50px;
+        width: 300px;
+        bottom: 50px;
+        background: #222;
+        font-size: 18px;
+        text-align: center;
+        margin: 0px auto;
+        transition: opacity 1s
+    }
+
+
+  </style>
+{% endblock %}
+{% block content %}
+    <div id="modalAdd" class="modal">
+    <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="close_modal()">&times;</span>
+            <div>
+                <h3 id="course_header">Add Course</h3>
+                <hr class="modal_hr">
+                <form action="/home/add_course_submit" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Title ID</label>
+                        {% if modal_error %}
+                        <input name="title_id" type="text" class="form-control" placeholder="i.e. CMPE 195F" value = "{{modal_request_data['title_id']}}">
+                        {% if 'title_id' in  error_message %}
+                        <p class="error"> * {{error_message['title_id']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="title_id" type="text" class="form-control" placeholder="i.e. CMPE 195F">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Title Name</label>
+                        {% if modal_error %}
+                        <input name="title" type="text" class="form-control" placeholder="i.e. CMPE 195F" value = "{{modal_request_data['title']}}">
+                        {% if 'title' in  error_message %}
+                        <p class="error"> * {{error_message['title']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="title" type="text" class="form-control" placeholder="i.e. Senior Project Design II">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Units</label>
+                        {% if modal_error %}
+                        <input name="units" type="number" class="form-control" value = {{modal_request_data['units']}}>
+                        {% if 'units' in  error_message %}
+                        <p class="error"> * {{error_message['units']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="units" type="number" class="form-control">
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Instructor ID</label>
+                        {% if modal_error %}
+                        <input name="user_id" type="number" class="form-control"  value = {{modal_request_data['user_id']}}>
+                        {% if 'user_id' in  error_message %}
+                        <p class="error"> * {{error_message['user_id']}}</p>
+                        {% endif %}
+                        {% else %}
+                        <input name="user_id" type="number" class="form-control">
+                        {% endif %}
+                        <a href = "javascript:void()" onclick="redirect_users()">Click to see all users</a>
+                    </div>
+                    <div class="form-group">
+                        <label>Days</label>
+                        <div class=form-control">
+                            <input name="days" type="checkbox" value = "M"}>
+                            <label>&nbsp;Monday&nbsp; </label>
+                            <input name="days" type="checkbox" value = "T">
+                            <label>&nbsp;Tuesday&nbsp; </label>
+                            <input name="days" type="checkbox" value = "W">
+                            <label>&nbsp;Wednesday&nbsp; </label>
+                            <input name="days" type="checkbox" value = "R">
+                            <label>&nbsp;Thursday&nbsp; </label>
+                            <input name="days" type="checkbox" value = "F">
+                            <label>&nbsp;Friday&nbsp; </label>
+                        </div>
+                        {% if 'days' in  error_message %}
+                        <p class="error"> * {{error_message['days']}}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <div style = "display:inline-block; width: 40%; margin-right: 10px">
+                            <label>Start Time</label>
+                            {% if modal_error %}
+                            <input name="start_time" type="time" class="form-control" value = {{modal_request_data['start_time']}}>
+                            {% else %}
+                            <input name="start_time" type="time" class="form-control">
+                            {% endif %}
+                        </div>
+                        <div style = "display:inline-block; width: 40%">
+                            <label>End Time</label>
+                            {% if modal_error %}
+                            <input name="end_time" type="time" class="form-control" value = {{modal_request_data['end_time']}}>
+                            {% else %}
+                            <input name="end_time" type="time" class="form-control">
+                            {% endif %}
+                        </div>
+                        {% if 'time' in  error_message %}
+                        <p class="error"> * {{error_message['time']}}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                         <div style = "display:inline-block; width: 40%; margin-right: 10px">
+                            <label>Start Date</label>
+                             {% if modal_error %}
+                             <input name="start_dt" type="date" class="form-control" value = {{modal_request_data['start_dt']}}>
+                             {% else %}
+                            <input name="start_dt" type="date" class="form-control">
+                             {% endif %}
+                        </div>
+                        <div style = "display:inline-block; width: 40%">
+                        <label>End Date</label>
+                            {% if modal_error %}
+                            <input name="end_dt" type="date" class="form-control" value = {{modal_request_data['end_dt']}}>
+                            {% else %}
+                            <input name="end_dt" type="date" class="form-control">
+                            {% endif %}
+                        </div>
+                        {% if 'date' in  error_message %}
+                        <p class="error"> * {{error_message['days']}}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button type="submit" class="form-control" id="submit_btn">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class = "home_container">
+        <h3 id = "w_header">
+            <b>
+                <i class="fa fa-user" style="color: #1e90ff "></i>
+                <p style = "color: #1e90ff">Hello {{cred['first_name']}} {{cred['last_name']}}!<p> Welcome to <span>FRAS</span>, your automated attendance system.
+            </b>
+        </h3>
+        <hr id = "home_hr">
+
+        {% if cred['admin'] %}
+        <div style = "float: left; margin-left: 10px; margin-top: 5px; width: 150px; height: 30px;">
+            <button class="add_button" onclick="open_course_form()"><i class = "fa fa-plus"></i> Add Course </button>
+        </div>
+        {% endif %}
+
+        <div class="search_container">
+        <div class="search">
+            <form action="/home" method="POST">
+                <input type="text" autocomplete="off"
+                    placeholder=" Search Courses"
+                    name="search">
+                <button>
+                    <i class="fa fa-search"
+                        style="font-size: 18px;">
+                    </i>
+                </button>
+            </form>
+        </div>
+        </div>
+        {% for row in data %}
+        <div class = "course_card">
+            <a href = /{{row['title_id']}}/attendance><h5>{{row['title_id'].replace("_"," ")}}</h5></a>
+            <div style = "margin-left:10px; padding-top: 10px;">
+                <p style = "font-size: 18px"><span>Title:</span> {{row['title']}}</p>
+                {% if cred['admin'] %}
+                    <p style = "font-size: 18px"><span>Instructor ID: </span> {{row['user_id']}}</p>
+                {% endif %}
+                <p style = "font-size: 18px"><span>Units:</span> {{row['units']}}</p>
+                <p style = "font-size: 18px"><span>Day/Time:</span> {{row['days']}} {{row['start_time']}}-{{row['end_time']}}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not data|length %}
+            <p style = "text-align: center; font-size: 15px;"> <b>{{message}}</b> </p>
+        {% endif %}
+    </div>
+    <div id = "toast_display" class = "toast_display" >
+            {{ submit_message }}
+        </div>
+{% endblock %}
+{% block script %}
+      <script>
+          markDashboard();
+          function markDashboard(){
+            let dashboard = document.getElementById("dashboard_bar");
+            dashboard.setAttribute("href", "#"); //disable redirect
+            dashboard.style.color = "white"; //color text white for mark
+            dashboard.style.background = "#1e90ff"; //color background blue for mark
+          }
+      </script>
+{% if cred['admin'] %}
+      <script>
+        modal_element = document.getElementById("modalAdd");
+        function open_course_form(){
+            modal_element.style.display = "block";
+          }
+        function close_modal(){
+            modal_element.style.display = "none";
+          }
+          function redirect_users(){
+            window.open("/users" ,"_blank");
+          }
+          {% if modal_error %}
+          modal_element.style.display = "block";
+          {% endif %}
+      </script>
+    {% if submit %}
+      <script>
+          toast_element = document.getElementById("toast_display");
+          toast_element.style.display = "block";
+          fade_toast()
+          function fade_toast(){
+            setTimeout(function(){
+            toast_element.style.opacity = "0";
+            }, 1000);
+            setTimeout(function(){
+            toast_element.style.display = "none";
+            }, 2000);
+          }
+      </script>
+      {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Spending</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <style>
+      .container{
+        margin: 0 auto;
+        height: 100%;
+        width: 100%;
+      }
+
+      button.button_style:hover{
+          color: #2e6da4;
+      }
+      .button_style{
+          background-color: #2E373D;
+          margin: font-size: 18px;
+          margin-right: 5%;
+          text-align: center;
+          color: white;
+          margin-top: 30px;
+          outline: none;
+          border: 1px solid #2E373D;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(#a0c4ee, white);
+    "
+  >
+    <nav class="navbar navbar-inverse" style="margin-bottom: 0px;">
+      <div class="container">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+            aria-expanded="false"
+            aria-controls="navbar"
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/home" style="font-size: 20px;"
+            >FRAS</a
+          >
+        </div>
+        <div
+          id="navbar"
+          class="collapse navbar-collapse"
+          style="font-size: 17px;"
+        >
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="/home"
+                ><span
+                  ><img
+                    src="https://cdn.clipart.email/c861d1f394b8e8bb1e8183ea39a11d23_white-house-silhouette-clip-art-at-clkercom-vector-clip-art-_540-598.png"
+                    width="17px"
+                    height="17px"
+                  /> </span
+                >Home</a
+              >
+            </li>
+            <li>
+              <a href="/chart"
+                ><span
+                  ><img
+                    src="https://ya-webdesign.com/transparent450_/graph-transparent-white-2.png"
+                    width="17px"
+                    height="17px"
+                  /> </span
+                >Chart</a
+              >
+            </li>
+            <li class="active">
+              <a href="/spending"
+                ><span
+                  ><img
+                    src="https://www.iconsdb.com/icons/preview/white/cash-receiving-xxl.png"
+                    width="17px"
+                    height="17px"
+                  /> </span
+                >Settings</a
+              >
+            </li>
+            <li><a href="/reset">Email Me</a></li>
+            <li><a href="/logout">Logout</a></li>
+            <li><a href="/upload-image">Upload Image</a></li>
+            <li><a href="/video_feed">Start Video Stream</a></li>
+          </ul>
+        </div>
+        <!--/.nav-collapse -->
+      </div>
+    </nav>
+    <!-- .container -->
+    <div class="container" style="padding: 0px; height: 90vh;">
+      <div
+        style="
+          background-color: #2e373d;
+          margin-left: 2%;
+          width: 100%;
+          height: 65px;
+          float: right;
+          border: 1px solid black;
+        "
+      >
+        <div style="float: left; margin-left: 8%; width: 50%;">
+          <h3 style="margin-left: 5%; text-align: left; color: white;">
+            <b>Current Target: ${{target}}</b>
+          </h3>
+        </div>
+        <div style="float: right; width: 40%;" align="right">
+          <button
+            class="button_style"
+            id="header_button"
+            onclick="display_target();"
+          >
+            Click Here To Change Target
+          </button>
+        </div>
+      </div>
+      <div
+        id="spending_container"
+        style="margin-left: 15%; margin-right: 15%; width: 70%; float: left;"
+      >
+        <form action="/settings/" method="POST">
+          <br />
+          <div class="form-group">
+            <label>Category:</label>
+            <!--<input type="text" class="form-control" name="category"/>-->
+            <select name="category" class="form-control">
+              <option value="classLength">Length Of Class</option>
+              <option value="numStudents">Number Of Students In Class</option>
+              <option value="lateTime">Time Before Student Is Marked Late</option>
+              <option value="entertainment">Random</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount:</label>
+            <input
+              type="text"
+              class="form-control"
+              name="amt"
+              autocomplete="off"
+              onkeypress="return key_text(event)"
+            />
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+              Apply
+            </button>
+          </div>
+          <p id="message" style="font-size: 15px; color: red;">{{message}}</p>
+        </form>
+      </div>
+      <div
+        id="target_container"
+        ;
+        style="
+          display: none;
+          border-bottom-left-radius: 30px;
+          margin-left: 5%;
+          padding-left: 2%;
+          padding-right: 2%;
+          width: 40%;
+          float: right;
+          height: 210px;
+          background: linear-gradient(#2e373d, #4f5a64, #5a6a76, #848484);
+        "
+      >
+        <form action="/target/" method="POST">
+          <br /><br />
+          <div class="form-group">
+            <label style="color: white;">Target Amount:</label>
+            <input
+              type="text"
+              class="form-control"
+              name="target_amt"
+              autocomplete="off"
+              onkeypress="return key_text(event)"
+            />
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit Target</button>
+          </div>
+          <p id="message_target" style="font-size: 15px; color: red;">
+            {{message_target}}
+          </p>
+        </form>
+      </div>
+    </div>
+    <footer
+      style="
+        background-color: #101010;
+        height: 40px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      "
+    ></footer>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+      function key_text(key) {
+        //Only allows number to be inputted
+        var x = key.charCode;
+        if (x >= 48 && x <= 57) {
+          return true;
+        }
+        return false;
+      }
+      function display_target() {
+        target_element = document.getElementById("target_container");
+        if (target_element.style.display == "none") {
+          target_element.style.display = "block";
+          document.getElementById("header_button").innerHTML = "[Hide]";
+          document.getElementById("spending_container").style.width = "45%";
+          document.getElementById("spending_container").style.marginLeft = "5%";
+          document.getElementById("spending_container").style.marginRight =
+            "5%";
+        } else {
+          target_element.style.display = "none";
+          document.getElementById("header_button").innerHTML =
+            "Click Here To Change Target";
+          document.getElementById("spending_container").style.width = "70%";
+          document.getElementById("spending_container").style.marginLeft =
+            "15%";
+          document.getElementById("spending_container").style.marginRight =
+            "15%";
+        }
+      }
+    </script>
+  </body>
+</html>
